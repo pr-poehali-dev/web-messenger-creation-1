@@ -17,12 +17,20 @@ export interface User {
 const Index = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
+  const handleUpdateUser = (updatedUser: User) => {
+    setCurrentUser(updatedUser);
+  };
+
   return (
     <div className="h-screen w-screen overflow-hidden">
       {!currentUser ? (
         <LoginScreen onLogin={setCurrentUser} />
       ) : (
-        <MessengerApp currentUser={currentUser} onLogout={() => setCurrentUser(null)} />
+        <MessengerApp 
+          currentUser={currentUser} 
+          onLogout={() => setCurrentUser(null)}
+          onUpdateUser={handleUpdateUser}
+        />
       )}
     </div>
   );

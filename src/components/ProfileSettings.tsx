@@ -11,9 +11,10 @@ import type { User } from '@/pages/Index';
 
 interface ProfileSettingsProps {
   currentUser: User;
+  onUpdateProfile: (firstName: string, lastName: string, username: string) => void;
 }
 
-const ProfileSettings = ({ currentUser }: ProfileSettingsProps) => {
+const ProfileSettings = ({ currentUser, onUpdateProfile }: ProfileSettingsProps) => {
   const { toast } = useToast();
   const [firstName, setFirstName] = useState(currentUser.firstName);
   const [lastName, setLastName] = useState(currentUser.lastName);
@@ -24,6 +25,17 @@ const ProfileSettings = ({ currentUser }: ProfileSettingsProps) => {
   };
 
   const handleSave = () => {
+    if (!firstName.trim() || !username.trim()) {
+      toast({
+        title: 'Ошибка',
+        description: 'Имя и username обязательны для заполнения',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    onUpdateProfile(firstName, lastName, username);
+    
     toast({
       title: 'Профиль обновлён',
       description: 'Изменения успешно сохранены',

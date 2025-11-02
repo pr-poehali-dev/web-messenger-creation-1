@@ -22,6 +22,7 @@ interface Chat {
 interface MessengerAppProps {
   currentUser: User;
   onLogout: () => void;
+  onUpdateUser: (user: User) => void;
 }
 
 const MOCK_USERS: User[] = [
@@ -60,7 +61,7 @@ const MOCK_USERS: User[] = [
   },
 ];
 
-const MessengerApp = ({ currentUser, onLogout }: MessengerAppProps) => {
+const MessengerApp = ({ currentUser, onLogout, onUpdateUser }: MessengerAppProps) => {
   const [activeView, setActiveView] = useState<'chats' | 'settings' | 'search'>('chats');
   const [chats, setChats] = useState<Chat[]>([
     {
@@ -117,6 +118,24 @@ const MessengerApp = ({ currentUser, onLogout }: MessengerAppProps) => {
     }
   };
 
+  const handleUpdateProfile = (firstName: string, lastName: string, username: string) => {
+    const updatedUser = {
+      ...currentUser,
+      firstName,
+      lastName,
+      username,
+    };
+    onUpdateUser(updatedUser);
+
+    setChats((prev) =>
+      prev.map((chat) =>
+        chat.user.id === currentUser.id
+          ? { ...chat, user: updatedUser }
+          : chat
+      )
+    );
+  };
+
   const handleAddContact = (user: User) => {
     const existingChat = chats.find((chat) => chat.user.id === user.id);
     if (existingChat) {
@@ -158,7 +177,10 @@ const MessengerApp = ({ currentUser, onLogout }: MessengerAppProps) => {
           />
         )}
         {activeView === 'settings' && (
-          <ProfileSettings currentUser={currentUser} />
+          <ProfileSettings 
+            currentUser={currentUser} 
+            onUpdateProfile={handleUpdateProfile}
+          />
         )}
         {activeView === 'search' && (
           <UserSearch
