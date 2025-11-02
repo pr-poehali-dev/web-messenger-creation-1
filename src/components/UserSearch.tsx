@@ -17,9 +17,16 @@ interface UserSearchProps {
 const UserSearch = ({ currentUser, existingContacts, onAddContact, allUsers }: UserSearchProps) => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [hasSearched, setHasSearched] = useState(false);
 
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName[0]}${lastName[0] || ''}`.toUpperCase();
+  };
+
+  const handleSearch = () => {
+    setSearchQuery(searchInput);
+    setHasSearched(true);
   };
 
   const filteredUsers = allUsers.filter((user) => {
@@ -68,18 +75,24 @@ const UserSearch = ({ currentUser, existingContacts, onAddContact, allUsers }: U
           </p>
         </div>
 
-        <div className="relative">
-          <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Введите username или имя..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-11"
-          />
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Введите username или имя..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              className="pl-10 h-11"
+            />
+          </div>
+          <Button onClick={handleSearch} className="h-11 px-6">
+            Искать
+          </Button>
         </div>
 
         <div className="space-y-2">
-          {searchQuery && filteredUsers.length === 0 && (
+          {hasSearched && searchQuery && filteredUsers.length === 0 && (
             <div className="text-center py-12">
               <Icon name="Search" size={48} className="mx-auto text-muted-foreground/50 mb-3" />
               <p className="text-muted-foreground">Пользователи не найдены</p>
@@ -89,7 +102,7 @@ const UserSearch = ({ currentUser, existingContacts, onAddContact, allUsers }: U
             </div>
           )}
 
-          {!searchQuery && (
+          {!hasSearched && (
             <div className="text-center py-12">
               <Icon name="Users" size={48} className="mx-auto text-muted-foreground/50 mb-3" />
               <p className="text-muted-foreground">Начните вводить для поиска</p>

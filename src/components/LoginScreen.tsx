@@ -16,6 +16,7 @@ const DEVELOPER_ACCOUNT = {
 };
 
 const LoginScreen = ({ onLogin }: LoginScreenProps) => {
+  const [isRegister, setIsRegister] = useState(false);
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -58,7 +59,9 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
             <Icon name="MessageSquare" className="text-white" size={32} />
           </div>
           <CardTitle className="text-2xl font-semibold">Корпоративный мессенджер</CardTitle>
-          <CardDescription className="text-base">Войдите, используя номер телефона и пароль</CardDescription>
+          <CardDescription className="text-base">
+            {isRegister ? 'Создайте новый аккаунт' : 'Войдите, используя номер телефона и пароль'}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="space-y-2">
@@ -94,11 +97,29 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
               <span>{error}</span>
             </div>
           )}
-          <Button onClick={handleLogin} className="w-full h-11 text-base font-medium" size="lg">
-            Войти
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={handleLogin}
+              variant={isRegister ? 'outline' : 'default'}
+              className="flex-1 h-11 text-base font-medium"
+              size="lg"
+            >
+              Войти
+            </Button>
+            <Button
+              onClick={() => {
+                setIsRegister(!isRegister);
+                setError('');
+              }}
+              variant={isRegister ? 'default' : 'outline'}
+              className="flex-1 h-11 text-base font-medium"
+              size="lg"
+            >
+              Регистрация
+            </Button>
+          </div>
           <p className="text-xs text-center text-muted-foreground pt-2">
-            Аккаунт создается автоматически при первом входе
+            {isRegister ? 'При регистрации будет создан новый аккаунт' : 'Аккаунт создается автоматически при первом входе'}
           </p>
         </CardContent>
       </Card>

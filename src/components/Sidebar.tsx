@@ -1,8 +1,19 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import Icon from '@/components/ui/icon';
 import type { User } from '@/pages/Index';
+import { useState } from 'react';
 
 interface Chat {
   id: string;
@@ -19,9 +30,11 @@ interface SidebarProps {
   onChangeView: (view: 'chats' | 'settings' | 'search') => void;
   activeView: 'chats' | 'settings' | 'search';
   onLogout: () => void;
+  onDeleteChat: (chatId: string) => void;
 }
 
-const Sidebar = ({ currentUser, chats, selectedChat, onSelectChat, onChangeView, activeView, onLogout }: SidebarProps) => {
+const Sidebar = ({ currentUser, chats, selectedChat, onSelectChat, onChangeView, activeView, onLogout, onDeleteChat }: SidebarProps) => {
+  const [chatToDelete, setChatToDelete] = useState<string | null>(null);
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName[0]}${lastName[0] || ''}`.toUpperCase();
   };
@@ -99,13 +112,16 @@ const Sidebar = ({ currentUser, chats, selectedChat, onSelectChat, onChangeView,
         {activeView === 'chats' && (
           <div className="divide-y divide-sidebar-border/50">
             {chats.map((chat) => (
-              <button
+              <div
                 key={chat.id}
-                onClick={() => onSelectChat(chat)}
-                className={`w-full p-4 flex items-center gap-3 hover:bg-sidebar-accent transition-colors ${
+                className={`w-full p-4 flex items-center gap-3 hover:bg-sidebar-accent transition-colors group ${
                   selectedChat?.id === chat.id ? 'bg-sidebar-accent' : ''
                 }`}
               >
+                <button
+                  onClick={() => onSelectChat(chat)}
+                  className="flex items-center gap-3 flex-1 min-w-0"
+                >
                 <div className="relative">
                   <Avatar className="h-12 w-12">
                     <AvatarFallback className="bg-primary/10 text-primary font-medium">
@@ -149,7 +165,19 @@ const Sidebar = ({ currentUser, chats, selectedChat, onSelectChat, onChangeView,
                     </p>
                   )}
                 </div>
-              </button>
+                </button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setChatToDelete(chat.id);
+                  }}
+                  className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 text-sidebar-foreground/60 hover:text-destructive"
+                >
+                  <Icon name="Trash2" size={16} />
+                </Button>
+              </div>
             ))}
           </div>
         )}
@@ -166,6 +194,31 @@ const Sidebar = ({ currentUser, chats, selectedChat, onSelectChat, onChangeView,
           Настройки профиля
         </Button>
       </div>
+
+      <AlertDialog open={chatToDelete !== null} onOpenChange={() => setChatToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Удалить чат?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Это действие нельзя отменить. Все сообщения в чате будут удалены.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Отмена</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (chatToDelete) {
+                  onDeleteChat(chatToDelete);
+                  setChatToDelete(null);
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Удалить
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

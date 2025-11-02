@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import ChatArea from '@/components/ChatArea';
 import ProfileSettings from '@/components/ProfileSettings';
@@ -75,6 +75,14 @@ const MessengerApp = ({ currentUser, onLogout }: MessengerAppProps) => {
   ]);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(chats[0] || null);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setChats((prev) => [...prev]);
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const handleSendMessage = (text: string) => {
     if (!selectedChat) return;
 
@@ -100,6 +108,13 @@ const MessengerApp = ({ currentUser, onLogout }: MessengerAppProps) => {
         prev.map((chat) => (chat.id === selectedChat.id ? { ...chat, isTyping: false } : chat))
       );
     }, 2000);
+  };
+
+  const handleDeleteChat = (chatId: string) => {
+    setChats((prev) => prev.filter((chat) => chat.id !== chatId));
+    if (selectedChat?.id === chatId) {
+      setSelectedChat(null);
+    }
   };
 
   const handleAddContact = (user: User) => {
@@ -132,6 +147,7 @@ const MessengerApp = ({ currentUser, onLogout }: MessengerAppProps) => {
         onChangeView={setActiveView}
         activeView={activeView}
         onLogout={onLogout}
+        onDeleteChat={handleDeleteChat}
       />
       <div className="flex-1 flex flex-col">
         {activeView === 'chats' && selectedChat && (
