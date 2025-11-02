@@ -27,8 +27,8 @@ interface SidebarProps {
   chats: Chat[];
   selectedChat: Chat | null;
   onSelectChat: (chat: Chat) => void;
-  onChangeView: (view: 'chats' | 'settings' | 'contacts') => void;
-  activeView: 'chats' | 'settings' | 'contacts';
+  onChangeView: (view: 'chats' | 'settings' | 'contacts' | 'admin') => void;
+  activeView: 'chats' | 'settings' | 'contacts' | 'admin';
   onLogout: () => void;
   onDeleteChat: (chatId: string) => void;
 }
@@ -183,7 +183,18 @@ const Sidebar = ({ currentUser, chats, selectedChat, onSelectChat, onChangeView,
         )}
       </div>
 
-      <div className="p-2 border-t border-sidebar-border">
+      <div className="p-2 border-t border-sidebar-border space-y-1">
+        {currentUser.isDeveloper && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onChangeView('admin')}
+            className="w-full justify-start h-10 text-sidebar-foreground"
+          >
+            <Icon name="Shield" size={18} className="mr-3" />
+            Админ-панель
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="sm"

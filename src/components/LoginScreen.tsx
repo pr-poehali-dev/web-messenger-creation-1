@@ -4,24 +4,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
+import { api } from '@/lib/api';
 import type { User } from '@/pages/Index';
 
 interface LoginScreenProps {
   onLogin: (user: User) => void;
 }
 
-const DEVELOPER_ACCOUNT = {
-  phone: '+79022428092',
-  password: '568876Qqq',
-};
-
 const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [isRegister, setIsRegister] = useState(false);
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setError('');
 
     if (!phone || !password) {
@@ -29,26 +26,34 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       return;
     }
 
-    const isDeveloper = phone === DEVELOPER_ACCOUNT.phone && password === DEVELOPER_ACCOUNT.password;
+    setLoading(true);
 
-    if (phone === DEVELOPER_ACCOUNT.phone && password !== DEVELOPER_ACCOUNT.password) {
-      setError('Неверный пароль');
-      return;
+    try {
+      let apiUser;
+      if (isRegister) {
+        apiUser = await api.register(phone, password);
+      } else {
+        apiUser = await api.login(phone, password);
+      }
+
+      const user: User = {
+        id: apiUser.id,
+        phone: apiUser.phone,
+        firstName: apiUser.first_name,
+        lastName: apiUser.last_name,
+        username: apiUser.username,
+        isDeveloper: apiUser.is_developer,
+        isBlocked: apiUser.is_blocked,
+        lastSeen: new Date(apiUser.last_seen),
+        isOnline: apiUser.is_online,
+      };
+
+      onLogin(user);
+    } catch (err: any) {
+      setError(err.message || 'Ошибка авторизации');
+    } finally {
+      setLoading(false);
     }
-
-    const user: User = {
-      id: Math.random().toString(36).substr(2, 9),
-      phone,
-      firstName: isDeveloper ? 'Разработчик' : 'Пользователь',
-      lastName: isDeveloper ? 'Системы' : '',
-      username: isDeveloper ? 'dev_admin' : `user${phone.slice(-4)}`,
-      isDeveloper,
-      isBlocked: false,
-      lastSeen: new Date(),
-      isOnline: true,
-    };
-
-    onLogin(user);
   };
 
   return (
@@ -103,8 +108,9 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
               variant={isRegister ? 'outline' : 'default'}
               className="flex-1 h-11 text-base font-medium"
               size="lg"
+              disabled={loading}
             >
-              Войти
+              {loading ? 'Загрузка...' : 'Войти'}
             </Button>
             <Button
               onClick={() => {
@@ -114,6 +120,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
               variant={isRegister ? 'default' : 'outline'}
               className="flex-1 h-11 text-base font-medium"
               size="lg"
+              disabled={loading}
             >
               Регистрация
             </Button>

@@ -1,0 +1,38 @@
+{
+  "tests": [
+    {
+      "name": "Register new user",
+      "method": "POST",
+      "path": "/?action=register",
+      "body": {
+        "phone": "+79991234567",
+        "password": "testpass123"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "user": {
+          "phone": "string",
+          "username": "string"
+        }
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Login user",
+      "method": "POST",
+      "path": "/?action=login",
+      "body": {
+        "phone": "+79022428092",
+        "password": "568876Qqq"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "user": {
+          "phone": "string",
+          "is_developer": "boolean"
+        }
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

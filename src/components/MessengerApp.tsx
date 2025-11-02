@@ -3,7 +3,10 @@ import Sidebar from '@/components/Sidebar';
 import ChatArea from '@/components/ChatArea';
 import ProfileSettings from '@/components/ProfileSettings';
 import ContactsView from '@/components/ContactsView';
+import AdminPanel from '@/components/AdminPanel';
+import { api } from '@/lib/api';
 import type { User } from '@/pages/Index';
+import type { Chat as ApiChat, Message as ApiMessage } from '@/lib/api';
 
 interface Message {
   id: string;
@@ -62,7 +65,7 @@ const MOCK_USERS: User[] = [
 ];
 
 const MessengerApp = ({ currentUser, onLogout, onUpdateUser }: MessengerAppProps) => {
-  const [activeView, setActiveView] = useState<'chats' | 'settings' | 'contacts'>('chats');
+  const [activeView, setActiveView] = useState<'chats' | 'settings' | 'contacts' | 'admin'>('chats');
   const [chats, setChats] = useState<Chat[]>([
     {
       id: '1',
@@ -189,6 +192,9 @@ const MessengerApp = ({ currentUser, onLogout, onUpdateUser }: MessengerAppProps
             onAddContact={handleAddContact}
             allUsers={MOCK_USERS}
           />
+        )}
+        {activeView === 'admin' && currentUser.isDeveloper && (
+          <AdminPanel currentUser={currentUser} />
         )}
       </div>
     </div>

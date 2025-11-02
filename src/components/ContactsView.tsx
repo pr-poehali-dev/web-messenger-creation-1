@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
+import { api } from '@/lib/api';
 import type { User } from '@/pages/Index';
 
 interface ContactsViewProps {
@@ -38,7 +39,7 @@ const ContactsView = ({ currentUser, contacts, allUsers, onAddContact }: Contact
     return new Date(date).toLocaleDateString('ru');
   };
 
-  const handleAddByPhone = () => {
+  const handleAddByPhone = async () => {
     if (!phoneNumber.trim()) {
       toast({
         title: 'Ошибка',
@@ -48,36 +49,56 @@ const ContactsView = ({ currentUser, contacts, allUsers, onAddContact }: Contact
       return;
     }
 
-    const user = allUsers.find((u) => u.phone === phoneNumber && u.id !== currentUser.id);
+    try {
+      const apiUser = await api.getUserByPhone(phoneNumber);
+      
+      if (apiUser.id === currentUser.id) {
+        toast({
+          title: 'Ошибка',
+          description: 'Нельзя добавить себя в контакты',
+          variant: 'destructive',
+        });
+        return;
+      }
 
-    if (!user) {
+      const user: User = {
+        id: apiUser.id,
+        phone: apiUser.phone,
+        firstName: apiUser.first_name,
+        lastName: apiUser.last_name,
+        username: apiUser.username,
+        isDeveloper: apiUser.is_developer,
+        isBlocked: apiUser.is_blocked,
+        lastSeen: new Date(apiUser.last_seen),
+        isOnline: apiUser.is_online,
+      };
+
+      const isAlreadyContact = contacts.some((c) => c.id === user.id);
+      if (isAlreadyContact) {
+        onAddContact(user);
+        setIsDialogOpen(false);
+        setPhoneNumber('');
+        toast({
+          title: 'Чат открыт',
+          description: `Переход к чату с ${user.firstName} ${user.lastName}`,
+        });
+        return;
+      }
+
+      onAddContact(user);
+      setIsDialogOpen(false);
+      setPhoneNumber('');
+      toast({
+        title: 'Контакт добавлен',
+        description: `${user.firstName} ${user.lastName} добавлен в контакты`,
+      });
+    } catch (error: any) {
       toast({
         title: 'Пользователь не найден',
         description: 'Пользователь с таким номером не зарегистрирован',
         variant: 'destructive',
       });
-      return;
     }
-
-    const isAlreadyContact = contacts.some((c) => c.id === user.id);
-    if (isAlreadyContact) {
-      onAddContact(user);
-      setIsDialogOpen(false);
-      setPhoneNumber('');
-      toast({
-        title: 'Чат открыт',
-        description: `Переход к чату с ${user.firstName} ${user.lastName}`,
-      });
-      return;
-    }
-
-    onAddContact(user);
-    setIsDialogOpen(false);
-    setPhoneNumber('');
-    toast({
-      title: 'Контакт добавлен',
-      description: `${user.firstName} ${user.lastName} добавлен в контакты`,
-    });
   };
 
   return (
