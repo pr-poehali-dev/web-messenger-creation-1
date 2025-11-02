@@ -154,7 +154,7 @@ def get_user_by_phone(event):
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
-    cur.execute("SELECT * FROM users WHERE phone = %s AND is_blocked = FALSE", (phone,))
+    cur.execute("SELECT * FROM users WHERE phone = %s", (phone,))
     user = cur.fetchone()
     
     if user:
