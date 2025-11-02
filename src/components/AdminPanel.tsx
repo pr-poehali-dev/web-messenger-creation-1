@@ -55,6 +55,27 @@ const AdminPanel = ({ currentUser }: AdminPanelProps) => {
     }
   };
 
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('Вы уверены? Это действие нельзя отменить. Пользователь и все его сообщения будут удалены.')) {
+      return;
+    }
+
+    try {
+      await api.adminDeleteUser(currentUser.id, userId);
+      await loadUsers();
+      toast({
+        title: 'Успешно',
+        description: 'Пользователь удалён',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Ошибка',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName[0]}${lastName[0] || ''}`.toUpperCase();
   };
@@ -191,18 +212,28 @@ const AdminPanel = ({ currentUser }: AdminPanelProps) => {
                       </TableCell>
                       <TableCell className="text-right">
                         {user.id !== currentUser.id && (
-                          <Button
-                            variant={user.is_blocked ? 'outline' : 'destructive'}
-                            size="sm"
-                            onClick={() => handleBlockUser(user.id, !user.is_blocked)}
-                          >
-                            <Icon
-                              name={user.is_blocked ? 'Unlock' : 'Ban'}
-                              size={16}
-                              className="mr-2"
-                            />
-                            {user.is_blocked ? 'Разблокировать' : 'Заблокировать'}
-                          </Button>
+                          <div className="flex gap-2 justify-end">
+                            <Button
+                              variant={user.is_blocked ? 'outline' : 'destructive'}
+                              size="sm"
+                              onClick={() => handleBlockUser(user.id, !user.is_blocked)}
+                            >
+                              <Icon
+                                name={user.is_blocked ? 'Unlock' : 'Ban'}
+                                size={16}
+                                className="mr-2"
+                              />
+                              {user.is_blocked ? 'Разблокировать' : 'Заблокировать'}
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeleteUser(user.id)}
+                            >
+                              <Icon name="Trash2" size={16} className="mr-2" />
+                              Удалить
+                            </Button>
+                          </div>
                         )}
                       </TableCell>
                     </TableRow>

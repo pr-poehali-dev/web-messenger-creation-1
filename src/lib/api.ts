@@ -140,4 +140,14 @@ export const api = {
     if (!response.ok) throw new Error(data.error || 'Operation failed');
     return data.user;
   },
+
+  async adminDeleteUser(adminId: string, targetUserId: string): Promise<void> {
+    const response = await fetch(`${API_URL}?action=admin/delete`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ admin_id: adminId, user_id: targetUserId }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Operation failed');
+  },
 };

@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
+import { api } from '@/lib/api';
 import type { User } from '@/pages/Index';
 
 interface ProfileSettingsProps {
@@ -24,7 +25,7 @@ const ProfileSettings = ({ currentUser, onUpdateProfile }: ProfileSettingsProps)
     return `${firstName[0]}${lastName[0] || ''}`.toUpperCase();
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!firstName.trim() || !username.trim()) {
       toast({
         title: 'Ошибка',
@@ -34,12 +35,21 @@ const ProfileSettings = ({ currentUser, onUpdateProfile }: ProfileSettingsProps)
       return;
     }
 
-    onUpdateProfile(firstName, lastName, username);
-    
-    toast({
-      title: 'Профиль обновлён',
-      description: 'Изменения успешно сохранены',
-    });
+    try {
+      await api.updateUser(currentUser.id, firstName, lastName, username);
+      onUpdateProfile(firstName, lastName, username);
+      
+      toast({
+        title: 'Профиль обновлён',
+        description: 'Изменения успешно сохранены',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Ошибка',
+        description: error.message || 'Не удалось сохранить изменения',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (

@@ -52,6 +52,8 @@ def handler(event, context):
         return admin_get_users(event)
     elif method == 'PUT' and path == 'admin/block':
         return admin_block_user(event)
+    elif method == 'POST' and path == 'admin/delete':
+        return admin_delete_user(event)
     
     return {
         'statusCode': 404,
@@ -152,7 +154,7 @@ def get_user_by_phone(event):
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
-    cur.execute("SELECT * FROM users WHERE phone = %s", (phone,))
+    cur.execute("SELECT * FROM users WHERE phone = %s AND is_blocked = FALSE", (phone,))
     user = cur.fetchone()
     
     if user:
@@ -441,4 +443,50 @@ def admin_block_user(event):
         'statusCode': 200,
         'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
         'body': json.dumps({'user': user_dict})
+    }
+
+def admin_delete_user(event):
+    body = json.loads(event.get('body', '{}'))
+    admin_id = body.get('admin_id')
+    target_user_id = body.get('user_id')
+    
+    conn = get_db_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    cur.execute("SELECT is_developer FROM users WHERE id = %s", (admin_id,))
+    admin = cur.fetchone()
+    
+    if not admin or not admin['is_developer']:
+        cur.close()
+        conn.close()
+        return {
+            'statusCode': 403,
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'error': 'Access denied'})
+        }
+    
+    cur.execute("SELECT id FROM users WHERE id = %s AND is_developer = FALSE", (target_user_id,))
+    target = cur.fetchone()
+    
+    if not target:
+        cur.close()
+        conn.close()
+        return {
+            'statusCode': 400,
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'error': 'Cannot delete admin or user not found'})
+        }
+    
+    cur.execute("DELETE FROM messages WHERE sender_id = %s", (target_user_id,))
+    cur.execute("DELETE FROM chats WHERE user1_id = %s OR user2_id = %s", (target_user_id, target_user_id))
+    cur.execute("DELETE FROM users WHERE id = %s", (target_user_id,))
+    conn.commit()
+    
+    cur.close()
+    conn.close()
+    
+    return {
+        'statusCode': 200,
+        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+        'body': json.dumps({'success': True})
     }
