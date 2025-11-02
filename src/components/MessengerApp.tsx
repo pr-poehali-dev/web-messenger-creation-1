@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import ChatArea from '@/components/ChatArea';
 import ProfileSettings from '@/components/ProfileSettings';
-import UserSearch from '@/components/UserSearch';
+import ContactsView from '@/components/ContactsView';
 import type { User } from '@/pages/Index';
 
 interface Message {
@@ -62,7 +62,7 @@ const MOCK_USERS: User[] = [
 ];
 
 const MessengerApp = ({ currentUser, onLogout, onUpdateUser }: MessengerAppProps) => {
-  const [activeView, setActiveView] = useState<'chats' | 'settings' | 'search'>('chats');
+  const [activeView, setActiveView] = useState<'chats' | 'settings' | 'contacts'>('chats');
   const [chats, setChats] = useState<Chat[]>([
     {
       id: '1',
@@ -182,10 +182,10 @@ const MessengerApp = ({ currentUser, onLogout, onUpdateUser }: MessengerAppProps
             onUpdateProfile={handleUpdateProfile}
           />
         )}
-        {activeView === 'search' && (
-          <UserSearch
+        {activeView === 'contacts' && (
+          <ContactsView
             currentUser={currentUser}
-            existingContacts={chats.map((c) => c.user)}
+            contacts={chats.map((c) => c.user)}
             onAddContact={handleAddContact}
             allUsers={MOCK_USERS}
           />

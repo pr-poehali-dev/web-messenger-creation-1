@@ -27,8 +27,8 @@ interface SidebarProps {
   chats: Chat[];
   selectedChat: Chat | null;
   onSelectChat: (chat: Chat) => void;
-  onChangeView: (view: 'chats' | 'settings' | 'search') => void;
-  activeView: 'chats' | 'settings' | 'search';
+  onChangeView: (view: 'chats' | 'settings' | 'contacts') => void;
+  activeView: 'chats' | 'settings' | 'contacts';
   onLogout: () => void;
   onDeleteChat: (chatId: string) => void;
 }
@@ -98,13 +98,13 @@ const Sidebar = ({ currentUser, chats, selectedChat, onSelectChat, onChangeView,
           Чаты
         </Button>
         <Button
-          variant={activeView === 'search' ? 'secondary' : 'ghost'}
+          variant={activeView === 'contacts' ? 'secondary' : 'ghost'}
           size="sm"
-          onClick={() => onChangeView('search')}
+          onClick={() => onChangeView('contacts')}
           className="flex-1 h-9 text-sidebar-foreground"
         >
-          <Icon name="Search" size={16} className="mr-2" />
-          Поиск
+          <Icon name="Users" size={16} className="mr-2" />
+          Контакты
         </Button>
       </div>
 
