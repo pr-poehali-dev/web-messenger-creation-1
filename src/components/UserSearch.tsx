@@ -151,9 +151,9 @@ const UserSearch = ({ currentUser, existingContacts, onAddContact, allUsers }: U
                 </p>
               </div>
               {isContact(user.id) ? (
-                <Button variant="outline" size="sm" disabled className="flex-shrink-0">
-                  <Icon name="Check" size={16} className="mr-2" />
-                  В контактах
+                <Button onClick={() => handleAddContact(user)} size="sm" className="flex-shrink-0">
+                  <Icon name="MessageSquare" size={16} className="mr-2" />
+                  Написать
                 </Button>
               ) : (
                 <Button onClick={() => handleAddContact(user)} size="sm" className="flex-shrink-0">
